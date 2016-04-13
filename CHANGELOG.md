@@ -37,4 +37,3 @@ Bug fix:
   - Issue 15 Chef is not throwing the proper warning message while deleting a netdev_group which 
              is protected.
   - Issue 18 If apply-group configuration it deleted, it is not configured during second Chef client run.
-
