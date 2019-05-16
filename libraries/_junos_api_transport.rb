@@ -20,7 +20,11 @@ require 'singleton'
 require_relative '_junos_api_client'
 
 begin
-  require 'net/netconf/jnpr/ioproc'
+  if IS_CONTAINER
+    require 'net/netconf/jnpr'
+  else
+    require 'net/netconf/jnpr/ioproc'
+  end
   require 'junos-ez/stdlib'
 rescue LoadError
   msg = 'Could not load the junos-ez-stdlib gem...'
@@ -95,8 +99,16 @@ module Netdev
 
       def open_connection!
         # Create a connection to the NETCONF service
-        @transport = Netconf::IOProc.new(Hash[timeout: 600])
-        @transport.open
+        # Create a connection to the NETCONF service
+        if IS_CONTAINER
+          # In case of docker container, open a NETCONF/SSH session
+          # NETCONF_USER refers to the login username configured for puppet operations
+          login = { :target => 'localhost', :username => ENV['NETCONF_USER'],  }
+          @transport = Netconf::SSH.new(login)
+        else
+          # Else, open an IOProc session
+          @transport = Netconf::IOProc.new(Hash[timeout: 600])
+        end
 
         # enable basic Junos EZ Stdlib providers
         ::Junos::Ez::Provider(@transport)
