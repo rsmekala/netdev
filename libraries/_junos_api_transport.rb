@@ -19,6 +19,8 @@ require 'singleton'
 
 require_relative '_junos_api_client'
 
+IS_CONTAINER = system("grep -qa /docker /proc/1/cgroup")
+
 begin
   if IS_CONTAINER
     require 'net/netconf/jnpr'
